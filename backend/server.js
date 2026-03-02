@@ -10,7 +10,10 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: 'https://clinic-hackathon-project-abdulrehman837s-projects.vercel.app',
+  origin: [
+    'https://clinic-hackathon-project-abdulrehman837s-projects.vercel.app',
+    'https://clinic-hackathon-project-git-main-abdulrehman837s-projects.vercel.app'
+  ],
   credentials: true
 }));
 app.use(express.json());
