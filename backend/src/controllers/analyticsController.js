@@ -1,5 +1,5 @@
 const User = require('../models/User');
-const Patient = require('../models/Patient');
+const Patient = require('../models/Patient')
 const Appointment = require('../models/Appointment');
 const Prescription = require('../models/Prescription');
 const DiagnosisLog = require('../models/DiagnosisLog');
