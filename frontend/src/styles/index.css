@@ -52,3 +52,16 @@ body {
     @apply bg-white rounded-2xl p-6 border border-slate-100 shadow-sm;
   }
 }
+
+/* Navbar Glow Effects */
+@layer utilities {
+  .nav-glow {
+    box-shadow: 0 0 30px rgba(59, 130, 246, 0.15), 
+                0 0 60px rgba(59, 130, 246, 0.05);
+  }
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
