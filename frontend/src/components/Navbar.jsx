@@ -1,40 +1,57 @@
-import { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useSelector, useDispatch } from 'react-redux'
+import { logout } from '../features/auth/authSlice'
 import {
   FiHome, FiUsers, FiCalendar, FiFileText,
-  FiBarChart2, FiCpu, FiLogOut, FiMenu, FiX
-} from 'react-icons/fi';
+  FiBarChart2, FiCpu, FiLogOut, FiMenu, FiX, FiUserPlus
+} from 'react-icons/fi'
 
 const Navbar = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const location = useLocation();
-  const navigate = useNavigate();
-  const token = localStorage.getItem('token');
+  const [isOpen, setIsOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+  const location = useLocation()
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
+  const { user } = useSelector((state) => state.auth)
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    const handleScroll = () => setScrolled(window.scrollY > 20)
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  useEffect(() => {
+    setIsOpen(false)
+  }, [location.pathname])
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/login');
-  };
+    dispatch(logout())
+    navigate('/login')
+  }
 
-  if (!token) return null;
+  const isActive = (path) => location.pathname === path
 
-  const navLinks = [
+  // Public links (not logged in)
+  const publicLinks = [
+    { path: '/', label: 'Home', icon: <FiHome size={18} /> },
+    { path: '/about', label: 'About', icon: <FiFileText size={18} /> },
+    { path: '/contact', label: 'Contact', icon: <FiUsers size={18} /> },
+  ]
+
+  // Protected links (logged in)
+  const protectedLinks = [
     { path: '/dashboard', label: 'Dashboard', icon: <FiHome size={18} /> },
-    { path: '/patients', label: 'Patients', icon: <FiUsers size={18} /> },
+    { path: '/patients', label: 'Patients', icon: <FiUsers size={18} />, roles: ['admin', 'doctor', 'receptionist'] },
     { path: '/appointments', label: 'Appointments', icon: <FiCalendar size={18} /> },
     { path: '/prescriptions', label: 'Prescriptions', icon: <FiFileText size={18} /> },
-    { path: '/analytics', label: 'Analytics', icon: <FiBarChart2 size={18} /> },
-    { path: '/ai-assistant', label: 'AI Assistant', icon: <FiCpu size={18} /> },
-  ];
+    { path: '/ai-tools', label: 'AI Tools', icon: <FiCpu size={18} />, roles: ['admin', 'doctor'] },
+    { path: '/manage-users', label: 'Manage Users', icon: <FiUserPlus size={18} />, roles: ['admin'] },
+  ]
 
-  const isActive = (path) => location.pathname === path;
+  const navLinks = user
+    ? protectedLinks.filter((link) => !link.roles || link.roles.includes(user.role))
+    : publicLinks
 
   return (
     <nav
@@ -46,9 +63,8 @@ const Navbar = () => {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-
           {/* Logo */}
-          <Link to="/dashboard" className="flex items-center gap-2 group">
+          <Link to={user ? '/dashboard' : '/'} className="flex items-center gap-2 group">
             <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center shadow-md group-hover:shadow-blue-300 transition-all duration-300">
               <span className="text-white font-bold text-sm">AI</span>
             </div>
@@ -79,15 +95,32 @@ const Navbar = () => {
             ))}
           </div>
 
-          {/* Logout + Mobile Toggle */}
+          {/* Right Side */}
           <div className="flex items-center gap-3">
-            <button
-              onClick={handleLogout}
-              className="hidden md:flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-500 hover:bg-red-50 rounded-lg transition-all duration-300"
-            >
-              <FiLogOut size={18} />
-              Logout
-            </button>
+            {user ? (
+              <button
+                onClick={handleLogout}
+                className="hidden md:flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-500 hover:bg-red-50 rounded-lg transition-all duration-300"
+              >
+                <FiLogOut size={18} />
+                Logout
+              </button>
+            ) : (
+              <div className="hidden md:flex items-center gap-2">
+                <Link
+                  to="/login"
+                  className="px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-300"
+                >
+                  Login
+                </Link>
+                <Link
+                  to="/signup"
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-all duration-300"
+                >
+                  Sign Up
+                </Link>
+              </div>
+            )}
 
             <button
               onClick={() => setIsOpen(!isOpen)}
@@ -102,7 +135,7 @@ const Navbar = () => {
       {/* Mobile Menu */}
       <div
         className={`md:hidden overflow-hidden transition-all duration-400 ease-in-out ${
-          isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+          isOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
         <div className="px-4 pb-4 pt-2 space-y-1 bg-white border-t border-gray-100">
@@ -110,7 +143,6 @@ const Navbar = () => {
             <Link
               key={link.path}
               to={link.path}
-              onClick={() => setIsOpen(false)}
               className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-300 ${
                 isActive(link.path)
                   ? 'bg-blue-50 text-blue-600'
@@ -121,17 +153,28 @@ const Navbar = () => {
               {link.label}
             </Link>
           ))}
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-sm font-medium text-red-500 hover:bg-red-50 transition-all duration-300"
-          >
-            <FiLogOut size={18} />
-            Logout
-          </button>
+          {user ? (
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-sm font-medium text-red-500 hover:bg-red-50 transition-all duration-300"
+            >
+              <FiLogOut size={18} />
+              Logout
+            </button>
+          ) : (
+            <>
+              <Link to="/login" className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-blue-600 hover:bg-blue-50">
+                Login
+              </Link>
+              <Link to="/signup" className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+                Sign Up
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </nav>
-  );
-};
+  )
+}
 
-export default Navbar;
+export default Navbar
