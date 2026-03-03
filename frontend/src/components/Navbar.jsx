@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
-import { logout } from '../features/auth/authSlice'
+import { logout } from '../store/slices/authSlice'
 import {
   FiHome, FiUsers, FiCalendar, FiFileText,
-  FiBarChart2, FiCpu, FiLogOut, FiMenu, FiX, FiUserPlus
+  FiCpu, FiLogOut, FiMenu, FiX, FiUserPlus
 } from 'react-icons/fi'
 
 const Navbar = () => {
@@ -32,14 +32,12 @@ const Navbar = () => {
 
   const isActive = (path) => location.pathname === path
 
-  // Public links (not logged in)
   const publicLinks = [
     { path: '/', label: 'Home', icon: <FiHome size={18} /> },
     { path: '/about', label: 'About', icon: <FiFileText size={18} /> },
     { path: '/contact', label: 'Contact', icon: <FiUsers size={18} /> },
   ]
 
-  // Protected links (logged in)
   const protectedLinks = [
     { path: '/dashboard', label: 'Dashboard', icon: <FiHome size={18} /> },
     { path: '/patients', label: 'Patients', icon: <FiUsers size={18} />, roles: ['admin', 'doctor', 'receptionist'] },
@@ -63,7 +61,6 @@ const Navbar = () => {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
           <Link to={user ? '/dashboard' : '/'} className="flex items-center gap-2 group">
             <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center shadow-md group-hover:shadow-blue-300 transition-all duration-300">
               <span className="text-white font-bold text-sm">AI</span>
@@ -73,7 +70,6 @@ const Navbar = () => {
             </span>
           </Link>
 
-          {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-1">
             {navLinks.map((link) => (
               <Link
@@ -85,9 +81,7 @@ const Navbar = () => {
                     : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                 }`}
               >
-                <span className={`transition-colors duration-300 ${
-                  isActive(link.path) ? 'text-blue-600' : 'text-gray-400'
-                }`}>
+                <span className={isActive(link.path) ? 'text-blue-600' : 'text-gray-400'}>
                   {link.icon}
                 </span>
                 {link.label}
@@ -95,7 +89,6 @@ const Navbar = () => {
             ))}
           </div>
 
-          {/* Right Side */}
           <div className="flex items-center gap-3">
             {user ? (
               <button
@@ -107,46 +100,29 @@ const Navbar = () => {
               </button>
             ) : (
               <div className="hidden md:flex items-center gap-2">
-                <Link
-                  to="/login"
-                  className="px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-300"
-                >
+                <Link to="/login" className="px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-all">
                   Login
                 </Link>
-                <Link
-                  to="/signup"
-                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-all duration-300"
-                >
+                <Link to="/signup" className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-all">
                   Sign Up
                 </Link>
               </div>
             )}
-
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="md:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
-            >
+            <button onClick={() => setIsOpen(!isOpen)} className="md:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100">
               {isOpen ? <FiX size={22} /> : <FiMenu size={22} />}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Mobile Menu */}
-      <div
-        className={`md:hidden overflow-hidden transition-all duration-400 ease-in-out ${
-          isOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
-        }`}
-      >
+      <div className={`md:hidden overflow-hidden transition-all duration-400 ${isOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
         <div className="px-4 pb-4 pt-2 space-y-1 bg-white border-t border-gray-100">
           {navLinks.map((link) => (
             <Link
               key={link.path}
               to={link.path}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-300 ${
-                isActive(link.path)
-                  ? 'bg-blue-50 text-blue-600'
-                  : 'text-gray-600 hover:bg-gray-50'
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium ${
+                isActive(link.path) ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'
               }`}
             >
               {link.icon}
@@ -154,21 +130,14 @@ const Navbar = () => {
             </Link>
           ))}
           {user ? (
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-sm font-medium text-red-500 hover:bg-red-50 transition-all duration-300"
-            >
+            <button onClick={handleLogout} className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-sm font-medium text-red-500 hover:bg-red-50">
               <FiLogOut size={18} />
               Logout
             </button>
           ) : (
             <>
-              <Link to="/login" className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-blue-600 hover:bg-blue-50">
-                Login
-              </Link>
-              <Link to="/signup" className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
-                Sign Up
-              </Link>
+              <Link to="/login" className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-blue-600 hover:bg-blue-50">Login</Link>
+              <Link to="/signup" className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-white bg-blue-600 rounded-lg">Sign Up</Link>
             </>
           )}
         </div>
