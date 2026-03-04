@@ -6,14 +6,12 @@ import Footer from './Footer'
 const Layout = () => {
   const { pathname } = useLocation()
 
-  useEffect(() => {
-    window.scrollTo(0, 0)
-  }, [pathname])
+  useEffect(() => { window.scrollTo(0, 0) }, [pathname])
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50">
+    <div className="min-h-screen min-h-[100dvh] flex flex-col bg-slate-50 overflow-x-hidden">
       <Navbar />
-      <main className="flex-1 pt-16"><Outlet /></main>
+      <main className="flex-1 pt-14 sm:pt-16"><Outlet /></main>
       <Footer />
     </div>
   )
