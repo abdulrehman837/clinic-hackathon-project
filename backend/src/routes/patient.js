@@ -12,7 +12,7 @@ router.route('/')
 router.route('/:id')
   .get(getPatient)
   .put(authorize('admin', 'receptionist', 'doctor'), updatePatient)
-  .delete(authorize('admin'), deletePatient);
+  .delete(authorize('admin', 'doctor', 'receptionist'), deletePatient);  // ✅ Fixed
 
 router.get('/:id/history', getPatientHistory);
 
